@@ -1,0 +1,59 @@
+<?php
+	require_once 'dbconfig.php';
+?>
+
+<html>
+	<head>
+		<title>PHP COVID</title>
+	</head>
+
+	<style>
+		table {
+			width : 100%;
+			border : 1px solid #444444;
+			border-collapse : collapse;
+		}
+		th,td{
+			border : 1px solid #444444;
+		}
+	</style>
+
+	<body>
+        <p><h3> 
+		<?php
+			$sql = "select count(*) as num_case from CASE_INFO";
+			$result = mysqli_query($con,$sql);
+			$data = mysqli_fetch_assoc($result);
+			echo "Case Info table (Currently ". $data['num_case'] ." cases in databases)
+			\n" ;
+		?>
+		</h3></p>
+        
+		<table class = "table table_striped">
+			<tr>
+				<th>Case_ID</th>
+				<th>Province</th>
+				<th>City</th>
+				<th>Infection_group</th>
+				<th>Infection_case</th>
+				<th>Confirmed</th>
+				<th>Latitude</th>
+				<th>Longitude</th>
+			</tr>
+
+			<?php
+				$sql = "select * from CASE_INFO";
+				$result = mysqli_query($con,$sql);
+				while($row = mysqli_fetch_assoc($result)){
+					print"<tr>";
+					foreach($row as $key => $val){
+						print"<td>" . $val . "</td>";
+					}
+					print"</tr>";
+				}
+			?>
+
+		</table>
+	</body>
+
+</html>
