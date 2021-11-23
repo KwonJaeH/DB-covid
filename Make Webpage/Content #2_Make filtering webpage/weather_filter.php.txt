@@ -67,14 +67,14 @@
             else if($province !="all" and $wdate != ''){ // province 입력 o, 날짜 입력 o
                 $sql = "select count(*) as num_weather from WEATHER where province ='$province' and wdate = '$wdate'";
                 $sql_2 = "select * from WEATHER where province ='$province' and wdate = '$wdate' order by wdate";
-                echo $wdate." '".$province."'  ";
+                echo $wdate." '".$province."' -  ";
 				
             }            
-            else if($province !="all"){ // province = "모두" 입력 x, 날짜 입력 o
+            else if($province !="all"){ // province 입력 o, 날짜 입력 x
                 $sql = "select count(*) as num_weather from WEATHER where province ='$province'";    
                 $sql_2 = "select * from WEATHER where province ='$province' order by wdate";
                 echo "All the weather in '".$province."' -  ";
-            }else if($wdate != ''){ // province 입력 o, 날짜 입력 x
+            }else if($wdate != ''){ // province="모두" 입력 x, 날짜 입력 o
                 $sql = "select count(*) as num_weather from WEATHER where wdate ='$wdate'";  
                 $sql_2 = "select * from WEATHER where wdate = '$wdate' order by wdate";
 
