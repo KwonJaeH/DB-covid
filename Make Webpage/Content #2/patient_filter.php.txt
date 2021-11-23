@@ -1,0 +1,85 @@
+<?php
+	require_once 'dbconfig.php';
+?>
+
+<html>
+	<head>
+		<title>PHP COVID</title>
+	</head>
+
+	<style>
+		table {
+			width : 100%;
+			border : 1px solid #444444;
+			border-collapse : collapse;
+		}
+		th,td{
+			border : 1px solid #444444;
+		}
+	</style>
+
+	<body>
+        <form method="get" action="./patient_filter.php">
+            start : <input type="date" name="start" value="2020-01-20" min="2020-01-20" max="2020-06-30">
+			<h3> ~ </h3>
+			end :  <input type="date" name="end" value="2020-06-30" min="2020-01-20" max="2020-06-30">
+			<input type="submit" value="확인">
+        </form>
+
+        <p><h3> 
+		<?php
+            if(isset($_GET['start'])){
+                $start = $_GET["start"];
+            }else{
+                $start = "2020-01-20";
+            }
+
+			if(isset($_GET['end'])){
+                $end = $_GET["end"];
+            }else{
+                $end = "2020-06-30";
+            }
+
+			$sql = "select count(*) as num_patient from PATIENT_INFO where '$start' <= confirmed_date and confirmed_date <= '$end'";
+			$result = mysqli_query($con,$sql);
+			$data = mysqli_fetch_assoc($result);
+			echo $start." ~ ".$end." 기간 동안 감염된 환자들 - "; 
+			echo "Patient Info table (Currently ". $data['num_patient'] ." patients in databases)
+			\n" ;
+		?>
+		</h3></p>
+        
+		<table class = "table table_striped">
+			<tr>
+				<th>Patient_ID</th>
+				<th>Sex</th>
+				<th>Age</th>
+				<th>Country</th>
+				<th>Province</th>
+				<th>City</th>
+				<th>Infection_case</th>
+				<th>Infected_by</th>
+				<th>contact_number</th>
+				<th>symptom_onset_date</th>
+				<th>confirmed_date</th>
+				<th>released_date</th>
+				<th>decreased_date</th>
+				<th>state</th>
+			</tr>
+
+			<?php
+				$sql = "select * from PATIENT_INFO where '$start' <= confirmed_date and confirmed_date <= '$end' order by confirmed_date";
+				$result = mysqli_query($con,$sql);
+				while($row = mysqli_fetch_assoc($result)){
+					print"<tr>";
+					foreach($row as $key => $val){
+						print"<td>" . $val . "</td>";
+					}
+					print"</tr>";
+				}
+			?>
+
+		</table>
+	</body>
+
+</html>

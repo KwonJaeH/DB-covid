@@ -1,0 +1,119 @@
+<?php
+	require_once 'dbconfig.php';
+?>
+
+<html>
+	<head>
+		<title>PHP COVID</title>
+	</head>
+
+	<style>
+		table {
+			width : 100%;
+			border : 1px solid #444444;
+			border-collapse : collapse;
+		}
+		th,td{
+			border : 1px solid #444444;
+		}
+	</style>
+
+	<body>
+
+        <form method="get" action="./weather_filter.php">
+            
+            날짜 입력 : <input type="date" name="wdate"  min="2020-01-23" max="2020-06-30">
+			
+            <select name="province" value="없음">
+                <option value ="all">모두</option>
+                <option value="Seoul">서울</option>   
+                <option value="Busan">부산</option>
+                <option value="Daegu">대구</option>
+                <option value="Incheon">인천</option>
+                <option value="Daejeon">대전</option>
+                <option value="Ulsan">울산</option>
+                <option value="Sejong">세종</option>
+                <option value="Gyeonggi-do">경기도</option>
+                <option value="Gangwon-do">강원도</option>
+                <option value="Chungcheongbuk-do">충청북도</option>
+                <option value="Chungcheongnam-do">충청남도</option>
+                <option value="Jeollabuk-do">전라북도</option>
+                <option value="Jeollanam-do">전라남도</option>
+                <option value="Gyeongsangbuk-do">경상북도</option>
+                <option value="Gyeongsangnam-do">경상남도</option>
+                <option value="Jeju-do">제주도</option>
+            </select>
+            <input type="submit" value="확인">  
+
+        </form>
+        <p><h3> 
+		<?php
+            if(isset($_GET['province'])){
+                $province = $_GET['province'];
+            }else{
+                $province = "default";
+            }
+             
+            if(isset($_GET['wdate'])){
+                $wdate = $_GET['wdate'];
+            }else{
+                $wdate = "default";
+            }
+            
+            if($province=="default" and $wdate == "default"){ // default page
+                $sql = "select count(*) as num_weather from WEATHER"; 
+                $sql_2 = "select * from WEATHER order by wdate";
+            }
+            else if($province !="all" and $wdate != ''){ // province 입력 o, 날짜 입력 o
+                $sql = "select count(*) as num_weather from WEATHER where province ='$province' and wdate = '$wdate'";
+                $sql_2 = "select * from WEATHER where province ='$province' and wdate = '$wdate' order by wdate";
+                echo $wdate." '".$province."'  ";
+				
+            }            
+            else if($province !="all"){ // province = "모두" 입력 x, 날짜 입력 o
+                $sql = "select count(*) as num_weather from WEATHER where province ='$province'";    
+                $sql_2 = "select * from WEATHER where province ='$province' order by wdate";
+                echo "All the weather in '".$province."' -  ";
+            }else if($wdate != ''){ // province 입력 o, 날짜 입력 x
+                $sql = "select count(*) as num_weather from WEATHER where wdate ='$wdate'";  
+                $sql_2 = "select * from WEATHER where wdate = '$wdate' order by wdate";
+
+                echo $wdate." All the weather - ";
+            }else { // province = "모두" 입력 x , 날짜 입력 x
+                $sql = "select count(*) as num_weather from WEATHER"; 
+                $sql_2 = "select * from WEATHER order by wdate";     
+            }
+            
+			$result = mysqli_query($con,$sql);
+			$data = mysqli_fetch_assoc($result);
+			echo "Weather table (Currently ". $data['num_weather'] ." weather in databases)
+			\n" ;
+		?>
+		</h3></p>
+        
+		<table class = "table table_striped">
+			<tr>
+				<th>Region_code</th>
+				<th>Province</th>
+				<th>Wdate</th>
+				<th>Avg_temp</th>
+				<th>Min_temp</th>
+				<th>Max_temp</th>
+			</tr>
+
+			<?php
+				$result = mysqli_query($con,$sql_2);
+				while($row = mysqli_fetch_assoc($result)){
+					print"<tr>";
+					foreach($row as $key => $val){
+						print"<td>" . $val . "</td>";
+					}
+					print"</tr>";
+				}
+			?>
+
+
+		</table>
+	</body>
+
+</html>
