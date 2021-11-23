@@ -1,66 +1,39 @@
 
-# 2021.11.15 
+# Case table filtering
 
-K_COVID19.csv 파일 읽은 후, mysql 데이터베이스에 데이터 삽입. 
+- 입력 받은 확진자 수 이상 감염된 국내 case 출력.  
+  : 입력 받지 않을 때는 default 값은 0 으로 설정.  
+    국내 감염 case 이므로, 외국에서의 감염 case(province가 NULL)는 출력에서 제외.
+    
+# Patient table filtering
 
- **데이터 삽입 과정 예외 처리**
-<br></br>
-- **CASE** 데이터 삽입
- : case_id 가 "NULL" 일 경우 continue 사용, case_id = "NULL" 인 경우 데이터를 삽입하지 않음.  
-   "overseas" in infection_case 인 경우(해외 유입 케이스), 시/구/동 정보가 없어도 되므로  
-   city, province 에 None 삽입해 데이터베이스에 NULL 삽입.  
-   나머지 컬럼들은 "NULL" 일 경우 None을 삽입해 데이터베이스에 NULL 삽입.
-<br></br>
-- **PATIENT** 데이터 삽입
- : patient_id 는 "NULL" 인 경우가 없으므로 int 형 변환 후 삽입.  
-   나머지 컬럼들은 "NULL" 일 경우 None을 삽입해 데이터베이스에 NULL을 삽입.
-<br></br>
-- **REGION** 데이터 삽입
- : region_code 가 "NULL" 일 경우 continue 사용, region_code = "NULL" 인 경우 데이터를 삽입하지 않음.  
-   나머지 컬럼들은 "NULL" 일 경우 None을 삽입해 데이터베이스에 NULL을 삽입.
-<br></br>
-- **WEATHER** 데이터 삽입
- : region_code 를 같이 사용하기 때문에 마찬가지로,
-   region_code 가 "NULL" 일 경우 continue 사용, region_code = "NULL" 인 경우 데이터를 삽입하지 않음.  
-   region_code, date 가 복합키로 사용되므로, region_code 가 중복되더라도 삽입.  
-   나머지 컬럼들은 "NULL" 일 경우 None을 삽입해 데이터베이스에 NULL을 삽입.
- 
--------------------------------------------------------------------------------------------------------------------------------------------------
+- 기간을 입력 받아 그 기간 동안에 감염된 patient 출력.  
+  : 시작 날짜와 끝 날짜의 default 값은 patient table의  
+    가장 작은 confirmed_date 2020-01-20 , 가장 큰 confirmed_date 2020-06-30 으로 설정.
+    
+# Weather table filtering
 
-# 2021.11.16
-
-K_COVID19.csv , addtional.csv 파일 읽은 후, mysql 데이터베이스에 데이터 삽입. 
-
-**데이터 삽입 과정 예외 처리**
-<br></br>
-- **Time** 데이터 삽입
- : addtional.csv 파일의 date 데이터 끝에서 한 줄 더 읽길래 date = None 일 경우 파일 읽기 중지.  
-   K_COVID19.csv 파일의 confirmed_date 가 "NULL" 일 경우 continue 사용, confirmed_date = "NULL" 인 경우 데이터 update 하지 않음.  
-<br></br>
-- **TimeAge** 데이터 삽입
- : date, age 가 복합키로 사용되므로,   
-   K_COVID19.csv 파일의 confirmed_date 가 "NULL" or age 가 "NULL" 일 경우 continue 사용,   
-   confirmed_date = "NULL" or age = "NULL" 인 경우 데이터 update 하지 않음.  
-<br></br>
-- **TimeGender** 데이터 삽입
- : date, sex 가 복합키로 사용되므로,   
-   K_COVID19.csv 파일의 confirmed_date 가 "NULL" or sex 가 "NULL" 일 경우 continue 사용,   
-   confirmed_date = "NULL" or sex = "NULL" 인 경우 데이터 삽입 및 update 하지 않음.  
-<br></br>
-- **TimeProvince** 데이터 삽입
- : date, province 가 복합키로 사용되므로,   
-   K_COVID19.csv 파일의 confirmed_date 가 "NULL" or province 가 "NULL" 일 경우 continue 사용,   
-   confirmed_date = "NULL" or province = "NULL" 인 경우 데이터 삽입 및 update 하지 않음. 
- 
-
--------------------------------------------------------------------------------------------------------------------------------------------------
-
-# 2021.11.21
-
-**Content #1**    
-  
-PatientInfo, Case, Region, Weather, Time_info 테이블을 웹 페이지에 출력,    
-페이지 최상단에는 row 개수 출력하는 php 파일 작성
-
-
--------------------------------------------------------------------------------------------------------------------------------------------------
+- Date 와 province 를 입력 받아 해당 wdate, province 의 weather  출력.  
+  : 아무 입력 받지않은 처음 페이지에는 모든 날짜, 모든 province의 weather 출력.  
+      
+    default 값은 province 는 '모두' , wdate = ''   
+    
+    입력 경우 **4가지** 고려
+    
+    [1] province 입력 o , wdate 입력 o   
+       : 해당하는 날짜에 해당하는 province weather 출력  
+         ex) "2020-06-30 'Seoul' - Weather table (Currently xxx weather in databases)"  
+    
+    [2] province 입력 o , 날짜 입력 x  
+       : 날짜 상관없이 해당하는 province 모든 weather 출력  
+         ex) "All the weather in 'Seoul' - Weather table (Currently xxx weather in databases)"
+    
+    [3] province 입력 x , 날짜 입력 o  
+       : 해당하는 날짜에 모든 province weather 출력  
+         ex) "2020-06-30 All the weather - Weather table (Currently xxx weather in databases)"  
+         
+    [4] province 입력 x , 날짜 입력 x  
+       : 모든 weather 출력  
+         ex) "Weather table (Currently 2551 weather in databases)"
+         
+    
