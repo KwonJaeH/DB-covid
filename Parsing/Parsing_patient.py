@@ -4,9 +4,9 @@ import pymysql as mysqldb
 import datetime
 
 #userid=input('Username: ')
+#userpwd=getpass.getpass('Password: ')
 userid = 'root'
-#userpwd = '' # 비밀번호 입력 
-userpwd=getpass.getpass('Password: ')
+userpwd = 'ehdwogus6277!'
 dbname='covid'
 
 # connect to MYSQL server
@@ -48,7 +48,7 @@ for ldx, line in enumerate(open('K_COVID19.csv', 'r')):
     VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s)
     """
     try:
-        cursor.execute(sql,(pid,sex,age,province,country,city,infection_case,infected_by,
+        cursor.execute(sql,(pid,sex,age,country,province,city,infection_case,infected_by,
                             contact_num,symptom,confirmed_date,released_date,decreased_date,state))
         print("Inserting [ %s ] to Patient" % (pid))
     except mysqldb.IntegrityError:
