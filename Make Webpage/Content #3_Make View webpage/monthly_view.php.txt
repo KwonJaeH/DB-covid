@@ -1,0 +1,109 @@
+<?php
+	require_once 'dbconfig.php';
+?>
+
+<html>
+	<head>
+		<title>PHP COVID</title>
+	</head>
+
+	<style>
+		table {
+			width : 100%;
+			border : 1px solid #444444;
+			border-collapse : collapse;
+		}
+		th,td{
+			border : 1px solid #444444;
+		}
+	</style>
+
+	<body>
+        <form method="get" action="./monthly_view.php">
+            <select name="month">
+                <option value='01'>1</option>
+                <option value='02'>2</option>
+                <option value='03'>3</option>
+                <option value='04'>4</option>
+                <option value='05'>5</option>
+                <option value='06'>6</option> 
+            </select>
+                월
+			<input type="submit" value="확인">
+        </form>
+
+        <p><h3> 
+		<?php
+            if(isset($_GET['month'])){
+                $month = $_GET["month"];
+            }else{
+                $month = '';
+            }
+
+			
+			echo "2020 - ".$month." 월 지역별 <br/>";
+			echo "확진 - 완치 - 사망<br/> 누적 확진 - 누적 완치 - 누적 사망";
+			
+			// view 삭제 (비워주기)
+			$sql = "drop view MONTHLY_C,MONTHLY_R,MONTHLY_D,MONTHLY_CR,MONTHLY_CRD,MONTHLY_ACCUM,MONTHLY";
+			$result = mysqli_query($con,$sql);	
+			
+			// 확진
+			$sql = "CREATE VIEW MONTHLY_C AS select province, count(*) as Confirmed from PATIENT_INFO where DATE_FORMAT(confirmed_date,'%m') = '$month' and confirmed_date is not null group by province";
+			$result = mysqli_query($con,$sql);
+			
+			// 완치
+			$sql = "CREATE VIEW MONTHLY_R AS select province, count(*) as Released from PATIENT_INFO where DATE_FORMAT(released_date,'%m') = '$month' and released_date is not null group by province";
+			$result = mysqli_query($con,$sql);
+			
+			// 사망
+			$sql = "CREATE VIEW MONTHLY_D AS select province, count(*) as Decreased from PATIENT_INFO where DATE_FORMAT(decreased_date,'%m') = '$month' and decreased_date is not null group by province";
+			$result = mysqli_query($con,$sql);
+
+			// 확진 + 완치
+			$sql = "CREATE VIEW MONTHLY_CR AS select A.province,A.confirmed, IFNULL(B.released,0) as released from MONTHLY_C A left join MONTHLY_R B on A.province = B.province";
+			$result = mysqli_query($con,$sql);
+
+			// 확진 + 완치 + 사망
+			$sql = "CREATE VIEW MONTHLY_CRD AS select CR.province,CR.confirmed,CR.released, IFNULL(D.decreased,0) as decreased from MONTHLY_CR CR left join MONTHLY_D D on CR.province = D.province";
+			$result = mysqli_query($con,$sql);
+			
+			//누적 확진, 누적 완치, 누적 사망
+			$sql = "CREATE VIEW MONTHLY_ACCUM AS select province,max(confirmed) as ac_confirmed , max(released) as ac_released, max(decreased) as ac_decreased from TIME_PROVINCE where DATE_FORMAT(date,'%m') = '$month' group by province";
+			$result = mysqli_query($con,$sql);
+			
+            // 확진,완치,사망, 누적 확진, 누적 완치, 누적 사망
+			$sql = "CREATE VIEW MONTHLY AS select A.province, A.confirmed, A.released, A.decreased, B.ac_confirmed, B.ac_released, B.ac_decreased from MONTHLY_CRD A left join MONTHLY_ACCUM B on A.province = B.province";
+			$result = mysqli_query($con,$sql);
+			
+			
+		?>
+		</h3></p>
+        
+		<table class = "table table_striped">
+			<tr>
+				<th>Province</th>
+				<th>confirmed</th>
+				<th>released</th>
+				<th>decreased</th>
+				<th>Accumulated_confirmed</th>
+				<th>Accumulated_released</th>
+				<th>Accumulated_decreased</th>
+			</tr>
+
+			<?php
+				$sql = "select * from MONTHLY order by province";
+				$result = mysqli_query($con,$sql);
+				while($row = mysqli_fetch_assoc($result)){
+					print"<tr>";
+					foreach($row as $key => $val){
+						print"<td>" . $val . "</td>";
+					}
+					print"</tr>";
+				}
+			?>
+
+		</table>
+	</body>
+
+</html>
