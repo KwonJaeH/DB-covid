@@ -7,7 +7,7 @@
     
 # Patient table filtering
 
-- 기간을 입력 받아 그 기간 동안에 감염된 patient 출력.  
+- 기간(start date - end date)을 입력 받아 그 기간 동안에 감염된 patient 출력.  
   : 시작 날짜와 끝 날짜의 default 값은 patient table의  
     가장 작은 confirmed_date 2020-01-20 , 가장 큰 confirmed_date 2020-06-30 으로 설정.
     
