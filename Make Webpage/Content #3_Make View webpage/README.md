@@ -1,39 +1,35 @@
 
-# Case table filtering
+# View-Monthly number of Region
 
-- 입력 받은 확진자 수 이상 감염된 국내 case 출력.  
-  : 입력 받지 않을 때는 default 값은 0 으로 설정.  
-    국내 감염 case 이므로, 외국에서의 감염 case(province가 NULL)는 출력에서 제외.
-    
-# Patient table filtering
-
-- 기간을 입력 받아 그 기간 동안에 감염된 patient 출력.  
-  : 시작 날짜와 끝 날짜의 default 값은 patient table의  
-    가장 작은 confirmed_date 2020-01-20 , 가장 큰 confirmed_date 2020-06-30 으로 설정.
-    
-# Weather table filtering
-
-- Date 와 province 를 입력 받아 해당 wdate, province 의 weather  출력.  
-  : 아무 입력 받지않은 처음 페이지에는 모든 날짜, 모든 province의 weather 출력.  
+'월' 을 입력 받아 해당하는 월에 지역별 확진, 완치, 사망, 누적 확진, 누적 완치, 누적 사망 수를 출력함.  
       
-    default 값은 province 는 '모두' , wdate = ''   
+        
+- View 생성 및 조회 과정
     
-    입력 경우 **4가지** 고려
+  MONTHLY 뒤에 나오는 C,R,D,ACCUM 은 Confirmed, Released, Decreased, Accumulated 를 의미함  
+     
     
-    [1] province 입력 o , wdate 입력 o   
-       : 해당하는 날짜에 해당하는 province weather 출력  
-         ex) "2020-06-30 'Seoul' - Weather table (Currently xxx weather in databases)"  
+  [1] 새로운 view를 생성하기 때문에 기존의 이름이 같은 view가 있으면 drop(삭제) 해준다.    
+  
+  
+  [2] Patient table 을 조회, 해당하는 '월'의 지역별 **확진** 수를 저장하는 view 생성 (MONTHLY_C)  
+  [3] Patient table 을 조회, 해당하는 '월'의 지역별 **완치** 수를 저장하는 view 생성 (MONTHLY_R)  
+  [4] Patient table 을 조회, 해당하는 '월'의 지역별 **사망** 수를 저장하는 view 생성 (MONTHLY_D)  
+  [5] Patient table 의 존재 이유는 "확진"이므로 confirmed_date 를 기준으로 조회한 MONTHLY_C 에 MONTHLY_R 를 left join 하여  
+  **확진 + 완치** 수를 저장하는 view 생성 (MONTHLY_CR) 
+     
+     
+  [6] MONTHLY_CR 에 MONTHLY_D 를 left join 하여 **확진 + 완치 + 사망** 수를 저장하는 view 생성 (MONTHLY_CRD) 
+  
+  
     
-    [2] province 입력 o , 날짜 입력 x  
-       : 날짜 상관없이 해당하는 province 모든 weather 출력  
-         ex) "All the weather in 'Seoul' - Weather table (Currently xxx weather in databases)"
-    
-    [3] province 입력 x , 날짜 입력 o  
-       : 해당하는 날짜에 모든 province weather 출력  
-         ex) "2020-06-30 All the weather - Weather table (Currently xxx weather in databases)"  
-         
-    [4] province 입력 x , 날짜 입력 x  
-       : 모든 weather 출력  
-         ex) "Weather table (Currently 2551 weather in databases)"
-         
-    
+  [7] TIME_PROVINCE table에 날짜별로 저장된 지역의 누적 확진, 누적 완치, 누적 사망수를 조회,  
+      해당하는 '월'의 지역별 max(누적 확진), max(누적 완치), max(누적 사망) 을 사용하여  
+      해당하는 '월'의 **누적 확진 + 누적 완치 + 누적 사망** 수를 저장하는 view 생성 (MONTHLY_ACCUM)
+      
+      
+  [8] 최종적으로 MONTHLY_CRD 와 MONTHLY_ACCUM 을 province 기준 join 하여  
+      **확,완,사 + 누확,누완,누사** 수를 저장하는 view 생성 (MONTHLY)  
+      
+      
+  [9] MONTHLY 를 Province 오름차순으로 select 하여 조회 하여 출력.
