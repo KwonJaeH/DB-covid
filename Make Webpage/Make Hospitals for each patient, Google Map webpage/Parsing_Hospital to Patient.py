@@ -37,7 +37,7 @@ for row in cursor:
     if city == 'Dalsung-gun':
         city = 'Dalseong-gun'
 
-    sql = "select success from (select EXISTS (select * from ALL_Region where province = '%s' and city='%s') as success)s" % (
+    sql = "select success from (select EXISTS (select * from REGION where province = '%s' and city='%s') as success)s" % (
     province, city)
     cur.execute(sql)
     success = cur.fetchone()
@@ -53,7 +53,7 @@ for row in cursor:
         cur.execute(sql)
         continue
 
-    sql = "select latitude, longitude from ALL_Region where province = '%s' and city = '%s'" % (province, city)
+    sql = "select latitude, longitude from REGION where province = '%s' and city = '%s'" % (province, city)
     cur.execute(sql)
     result = cur.fetchone()
 
