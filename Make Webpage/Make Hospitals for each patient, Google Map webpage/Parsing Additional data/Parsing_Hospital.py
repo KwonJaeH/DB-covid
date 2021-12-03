@@ -5,8 +5,8 @@ import datetime
 
 #userid=input('Username: ')
 userid = 'root'
-userpwd = 'ehdwogus6277!' # 비밀번호 입력
-#userpwd=getpass.getpass('Password: ')
+#userpwd = '' # 비밀번호 입력
+userpwd=getpass.getpass('Password: ')
 dbname='covid'
 
 # connect to MYSQL server
